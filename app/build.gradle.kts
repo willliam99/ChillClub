@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId = "com.xeniac.chillclub"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 37
         versionCode = 9
         versionName = "1.1.6"
