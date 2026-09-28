@@ -1,5 +1,7 @@
 package com.xeniac.chillclub.feature_music_player.domain.use_cases
 
+import com.xeniac.chillclub.core.domain.use_cases.GetIsRequestNotificationPermissionShownTodayUseCase
+import com.xeniac.chillclub.core.domain.use_cases.StoreRequestNotificationPermissionDateUseCase
 import dagger.Lazy
 import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
@@ -13,6 +15,6 @@ data class MusicPlayerUseCases @Inject constructor(
     val getIsPlayInBackgroundEnabledUseCase: Lazy<GetIsPlayInBackgroundEnabledUseCase>,
     val getCurrentlyPlayingRadioStationIdUseCase: Lazy<GetCurrentlyPlayingRadioStationIdUseCase>,
     val storeCurrentlyPlayingRadioStationIdUseCase: Lazy<StoreCurrentlyPlayingRadioStationIdUseCase>,
-    val getNotificationPermissionCountUseCase: Lazy<GetNotificationPermissionCountUseCase>,
-    val storeNotificationPermissionCountUseCase: Lazy<StoreNotificationPermissionCountUseCase>
+    val getIsRequestNotificationPermissionShownTodayUseCase: Lazy<GetIsRequestNotificationPermissionShownTodayUseCase>,
+    val storeRequestNotificationPermissionDateUseCase: Lazy<StoreRequestNotificationPermissionDateUseCase>
 )

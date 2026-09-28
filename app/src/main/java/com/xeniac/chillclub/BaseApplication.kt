@@ -133,7 +133,7 @@ class BaseApplication : Application(), SingletonImageLoader.Factory {
 
     override fun newImageLoader(
         context: PlatformContext
-    ): ImageLoader = ImageLoader.Builder(context).apply {
+    ): ImageLoader = ImageLoader.Builder(context = context).apply {
         components {
             add(factory = SvgDecoder.Factory()) // SVGs
             when { // GIFs
@@ -159,7 +159,7 @@ class BaseApplication : Application(), SingletonImageLoader.Factory {
 
         diskCache {
             DiskCache.Builder().apply {
-                directory(cacheDir.resolve(relative = "image_cache")) // Set cache directory folder name
+                directory(directory = cacheDir.resolve(relative = "image_cache")) // Set cache directory folder name
                 maxSizePercent(percent = 0.03) // Set the max size to 3% of the device's free disk space.
             }.build()
         }

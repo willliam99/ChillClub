@@ -15,7 +15,6 @@ import com.xeniac.chillclub.core.domain.models.PermissionsPreferencesSerializer
 import com.xeniac.chillclub.core.domain.repositories.PermissionsDataStoreRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -67,22 +66,20 @@ class PermissionsDataStoreRepositoryImplTest {
 
     /*
     Fetch Initial Preferences Test Cases:
-    getNotificationPermissionCount -> 0
+    isRequestNotificationPermissionShownToday -> false
      */
     @Test
     fun fetchInitialPreferences() = testScope.runTest {
-        val initialNotificationPermissionCount = testRepository
-            .getNotificationPermissionCount().first()
+        val isShownToday = testRepository.isRequestNotificationPermissionShownToday()
 
-        assertThat(initialNotificationPermissionCount).isEqualTo(0)
+        assertThat(isShownToday).isFalse()
     }
 
     @Test
-    fun writeNotificationPermissionCount() = testScope.runTest {
-        val testValue = 2
-        testRepository.storeNotificationPermissionCount(count = testValue)
+    fun writeRequestNotificationPermissionDate() = testScope.runTest {
+        testRepository.storeRequestNotificationPermissionDate()
 
-        val notificationPermissionCount = testRepository.getNotificationPermissionCount().first()
-        assertThat(notificationPermissionCount).isEqualTo(testValue)
+        val isShownToday = testRepository.isRequestNotificationPermissionShownToday()
+        assertThat(isShownToday).isTrue()
     }
 }

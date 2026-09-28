@@ -3,6 +3,7 @@ package com.xeniac.chillclub.feature_music_player.presensation.states
 import android.graphics.Rect
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.xeniac.chillclub.core.domain.models.RadioStation
+import com.xeniac.chillclub.core.presentation.common.states.PostNotificationPermissionState
 import com.xeniac.chillclub.core.presentation.common.utils.UiText
 import com.xeniac.chillclub.feature_music_player.domain.repositories.MusicVolumePercentage
 
@@ -20,7 +21,5 @@ data class MusicPlayerState(
     val isMusicBuffering: Boolean = false,
     val isMusicPlaying: Boolean = false,
     val errorMessage: UiText? = null,
-    val isPermissionDialogVisible: Boolean = false,
-    val notificationPermissionCount: Int = 0,
-    val permissionDialogQueue: List<String> = emptyList()
+    val postNotificationPermissionState: PostNotificationPermissionState = PostNotificationPermissionState()
 )

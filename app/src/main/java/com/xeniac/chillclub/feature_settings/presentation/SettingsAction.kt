@@ -6,10 +6,10 @@ sealed interface SettingsAction {
     data class StoreCurrentAppTheme(val newAppTheme: AppTheme) : SettingsAction
     data class StorePlayInBackgroundSwitch(val isEnabled: Boolean) : SettingsAction
 
-    data class OnPermissionResult(
-        val permission: String,
-        val isGranted: Boolean
+    data class OnNotificationPermissionResult(
+        val isGranted: Boolean,
+        val isPermanentlyDeclined: Boolean
     ) : SettingsAction
 
-    data class DismissPermissionDialog(val permission: String) : SettingsAction
+    data object DismissNotificationPermissionDialog : SettingsAction
 }

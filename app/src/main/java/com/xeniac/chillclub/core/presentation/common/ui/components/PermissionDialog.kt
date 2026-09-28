@@ -1,9 +1,10 @@
 package com.xeniac.chillclub.core.presentation.common.ui.components
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
 import com.xeniac.chillclub.R
+import com.xeniac.chillclub.core.presentation.common.utils.findActivity
+import com.xeniac.chillclub.core.presentation.common.utils.openAppSettings
 import com.xeniac.chillclub.core.presentation.common.utils.permission.PermissionHelper
 
 @Composable
@@ -29,43 +32,37 @@ fun PermissionDialog(
     isPermanentlyDeclined: Boolean,
     icon: Painter,
     modifier: Modifier = Modifier,
-    dismissOnBackPress: Boolean = true,
-    dismissOnClickOutside: Boolean = true,
-    usePlatformDefaultWidth: Boolean = true,
-    decorFitsSystemWindows: Boolean = true,
     securePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
     dialogProperties: DialogProperties = DialogProperties(
-        dismissOnBackPress = dismissOnBackPress,
-        dismissOnClickOutside = dismissOnClickOutside,
-        usePlatformDefaultWidth = usePlatformDefaultWidth,
-        decorFitsSystemWindows = decorFitsSystemWindows,
+        dismissOnBackPress = true,
+        dismissOnClickOutside = true,
+        usePlatformDefaultWidth = true,
+        decorFitsSystemWindows = true,
         securePolicy = securePolicy
     ),
     title: String? = null,
-    confirmButtonText: String = if (isPermanentlyDeclined) stringResource(
-        id = R.string.permissions_error_btn_open_settings
-    ) else stringResource(
-        id = R.string.permissions_error_btn_confirm
-    ),
-    shape: Shape = AlertDialogDefaults.shape,
+    confirmButtonText: String = when {
+        isPermanentlyDeclined -> stringResource(id = R.string.permissions_error_btn_open_settings)
+        else -> stringResource(id = R.string.permissions_error_btn_confirm)
+    },
+    dismissButtonText: String = stringResource(id = R.string.permissions_error_btn_dismiss),
     containerColor: Color = MaterialTheme.colorScheme.surface,
     iconContentColor: Color = MaterialTheme.colorScheme.secondary,
     titleContentColor: Color = MaterialTheme.colorScheme.onSurface,
     textContentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    dismissButtonText: String? = null,
     onConfirmClick: () -> Unit,
-    onOpenAppSettingsClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val activity = LocalActivity.current ?: context.findActivity()
+
     AlertDialog(
-        modifier = modifier,
+        onDismissRequest = onDismiss,
         properties = dialogProperties,
-        shape = shape,
         containerColor = containerColor,
         iconContentColor = iconContentColor,
         titleContentColor = titleContentColor,
         textContentColor = textContentColor,
-        onDismissRequest = onDismiss,
         icon = {
             Box(
                 contentAlignment = Alignment.Center,
@@ -74,7 +71,7 @@ fun PermissionDialog(
                 Icon(
                     painter = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         },
@@ -99,10 +96,9 @@ fun PermissionDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (isPermanentlyDeclined) {
-                        onOpenAppSettingsClick()
-                    } else {
-                        onConfirmClick()
+                    when {
+                        isPermanentlyDeclined -> activity.openAppSettings()
+                        else -> onConfirmClick()
                     }
                     onDismiss()
                 }
@@ -115,17 +111,18 @@ fun PermissionDialog(
                 )
             }
         },
-        dismissButton = dismissButtonText?.let {
-            {
-                TextButton(onClick = onDismiss) {
-                    Text(
-                        text = dismissButtonText,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text(
+                    text = dismissButtonText,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
-        }
+        },
+        modifier = modifier
     )
 }

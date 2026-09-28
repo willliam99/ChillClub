@@ -36,7 +36,7 @@ import com.xeniac.chillclub.core.presentation.common.utils.UiEvent
 import com.xeniac.chillclub.feature_music_player.presensation.components.MusicPlayer
 import com.xeniac.chillclub.feature_music_player.presensation.components.MusicPlayerBackground
 import com.xeniac.chillclub.feature_music_player.presensation.components.MusicPlayerTopAppBar
-import com.xeniac.chillclub.feature_music_player.presensation.components.PostNotificationPermissionHandler
+import com.xeniac.chillclub.feature_music_player.presensation.components.PostNotificationPermission
 import com.xeniac.chillclub.feature_music_player.presensation.components.RadioStationsBottomSheet
 import com.xeniac.chillclub.feature_music_player.presensation.components.YouTubePlayer
 import com.xeniac.chillclub.feature_music_player.presensation.utils.MusicPlayerUiEvent
@@ -197,8 +197,8 @@ fun MusicPlayerScreen(
         }
     }
 
-    PostNotificationPermissionHandler(
-        state = state,
+    PostNotificationPermission(
+        state = state.postNotificationPermissionState,
         onAction = viewModel::onAction
     )
 }
