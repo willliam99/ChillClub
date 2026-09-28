@@ -59,11 +59,11 @@ class SettingsViewModel @Inject constructor(
         when (action) {
             is SettingsAction.StoreCurrentAppTheme -> storeCurrentAppTheme(action.newAppTheme)
             is SettingsAction.StorePlayInBackgroundSwitch -> storeNotificationSoundSwitch(action.isEnabled)
-            is SettingsAction.OnPermissionResult -> onPermissionResult(
-                permission = action.permission,
-                isGranted = action.isGranted
+            is SettingsAction.OnNotificationPermissionResult -> onNotificationPermissionResult(
+                isGranted = action.isGranted,
+                isPermanentlyDeclined = action.isPermanentlyDeclined
             )
-            is SettingsAction.DismissPermissionDialog -> dismissPermissionDialog(action.permission)
+            SettingsAction.DismissNotificationPermissionDialog -> dismissNotificationPermissionDialog()
         }
     }
 
@@ -108,33 +108,32 @@ class SettingsViewModel @Inject constructor(
         }.launchIn(scope = viewModelScope)
     }
 
-    private fun onPermissionResult(
-        permission: String,
-        isGranted: Boolean
-    ) = viewModelScope.launch {
-        val shouldAskForPermission = _state.value.run {
-            !permissionDialogQueue.contains(permission) && !isGranted
-        }
-
-        if (shouldAskForPermission) {
-            _state.update {
-                it.copy(
-                    permissionDialogQueue = listOf(permission),
-                    isPermissionDialogVisible = true
+    private fun onNotificationPermissionResult(
+        isGranted: Boolean,
+        isPermanentlyDeclined: Boolean
+    ) {
+        _state.update {
+            it.copy(
+                postNotificationPermissionState = it.postNotificationPermissionState.copy(
+                    isNotificationPermissionPermanentlyDeclined = when {
+                        !isGranted -> isPermanentlyDeclined
+                        else -> false
+                    },
+                    isNotificationPermissionDialogVisible = when {
+                        !isGranted -> isPermanentlyDeclined
+                        else -> false
+                    }
                 )
-            }
+            )
         }
     }
 
-    private fun dismissPermissionDialog(
-        permission: String
-    ) = viewModelScope.launch {
+    private fun dismissNotificationPermissionDialog() = viewModelScope.launch {
         _state.update {
             it.copy(
-                permissionDialogQueue = it.permissionDialogQueue.toMutableList().apply {
-                    remove(permission)
-                },
-                isPermissionDialogVisible = false
+                postNotificationPermissionState = it.postNotificationPermissionState.copy(
+                    isNotificationPermissionDialogVisible = false
+                )
             )
         }
     }

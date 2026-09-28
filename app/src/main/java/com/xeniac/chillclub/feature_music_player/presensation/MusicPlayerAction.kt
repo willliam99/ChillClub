@@ -22,10 +22,10 @@ sealed interface MusicPlayerAction {
     data class ShowYouTubePlayerError(val error: PlayerConstants.PlayerError) : MusicPlayerAction
     data class YouTubePlayerStateChanged(val state: PlayerConstants.PlayerState) : MusicPlayerAction
 
-    data class OnPermissionResult(
-        val permission: String,
-        val isGranted: Boolean
+    data class OnNotificationPermissionResult(
+        val isGranted: Boolean,
+        val isPermanentlyDeclined: Boolean
     ) : MusicPlayerAction
 
-    data class DismissPermissionDialog(val permission: String) : MusicPlayerAction
+    data object DismissNotificationPermissionDialog : MusicPlayerAction
 }

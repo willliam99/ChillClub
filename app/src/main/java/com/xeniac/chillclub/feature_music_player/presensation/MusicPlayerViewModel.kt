@@ -43,14 +43,16 @@ class MusicPlayerViewModel @Inject constructor(
         flow2 = musicPlayerUseCases.getCurrentlyPlayingRadioStationIdUseCase.get()(),
         flow3 = musicPlayerUseCases.observeMusicVolumeChangesUseCase.get()(),
         flow4 = musicPlayerUseCases.getIsPlayInBackgroundEnabledUseCase.get()(),
-        flow5 = musicPlayerUseCases.getNotificationPermissionCountUseCase.get()()
-    ) { state, currentlyPlayingRadioStationId, musicVolumePercentage, isPlayInBackgroundEnabled, notificationPermissionCount ->
+        flow5 = musicPlayerUseCases.getIsRequestNotificationPermissionShownTodayUseCase.get()()
+    ) { state, currentlyPlayingRadioStationId, musicVolumePercentage, isPlayInBackgroundEnabled, isRequestNotificationPermissionShownToday ->
         _state.update {
             state.copy(
                 currentRadioStationId = currentlyPlayingRadioStationId,
                 musicVolumePercentage = musicVolumePercentage,
                 isPlayInBackgroundEnabled = isPlayInBackgroundEnabled,
-                notificationPermissionCount = notificationPermissionCount
+                postNotificationPermissionState = state.postNotificationPermissionState.copy(
+                    isRequestNotificationPermissionShownToday = isRequestNotificationPermissionShownToday
+                )
             )
         }
 
@@ -95,11 +97,11 @@ class MusicPlayerViewModel @Inject constructor(
             is MusicPlayerAction.InitializeYouTubePlayer -> initializeYouTubePlayer(action.player)
             is MusicPlayerAction.ShowYouTubePlayerError -> showYouTubePlayerError(action.error)
             is MusicPlayerAction.YouTubePlayerStateChanged -> youTubePlayerStateChanged(action.state)
-            is MusicPlayerAction.OnPermissionResult -> onPermissionResult(
-                permission = action.permission,
-                isGranted = action.isGranted
+            is MusicPlayerAction.OnNotificationPermissionResult -> onNotificationPermissionResult(
+                isGranted = action.isGranted,
+                isPermanentlyDeclined = action.isPermanentlyDeclined
             )
-            is MusicPlayerAction.DismissPermissionDialog -> dismissPermissionDialog(action.permission)
+            MusicPlayerAction.DismissNotificationPermissionDialog -> dismissNotificationPermissionDialog()
         }
     }
 
@@ -334,37 +336,34 @@ class MusicPlayerViewModel @Inject constructor(
         }
     }
 
-    private fun onPermissionResult(
-        permission: String,
-        isGranted: Boolean
-    ) = viewModelScope.launch {
-        val shouldAskForPermission = _state.value.run {
-            notificationPermissionCount < 1 && !permissionDialogQueue.contains(permission) && !isGranted
-        }
-
-        if (shouldAskForPermission) {
+    private fun onNotificationPermissionResult(
+        isGranted: Boolean,
+        isPermanentlyDeclined: Boolean
+    ) {
+        musicPlayerUseCases.storeRequestNotificationPermissionDateUseCase.get()().onStart {
             _state.update {
                 it.copy(
-                    permissionDialogQueue = listOf(permission),
-                    isPermissionDialogVisible = true
+                    postNotificationPermissionState = it.postNotificationPermissionState.copy(
+                        isNotificationPermissionPermanentlyDeclined = when {
+                            !isGranted -> isPermanentlyDeclined
+                            else -> false
+                        },
+                        isNotificationPermissionDialogVisible = when {
+                            !isGranted -> isPermanentlyDeclined
+                            else -> false
+                        }
+                    )
                 )
             }
-        }
+        }.launchIn(scope = viewModelScope)
     }
 
-    private fun dismissPermissionDialog(
-        permission: String
-    ) = viewModelScope.launch {
-        musicPlayerUseCases.storeNotificationPermissionCountUseCase.get()(
-            count = _state.value.notificationPermissionCount.plus(other = 1)
-        )
-
+    private fun dismissNotificationPermissionDialog() = viewModelScope.launch {
         _state.update {
             it.copy(
-                permissionDialogQueue = _state.value.permissionDialogQueue.toMutableList().apply {
-                    remove(permission)
-                },
-                isPermissionDialogVisible = false
+                postNotificationPermissionState = it.postNotificationPermissionState.copy(
+                    isNotificationPermissionDialogVisible = false
+                )
             )
         }
     }
